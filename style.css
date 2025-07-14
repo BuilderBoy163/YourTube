@@ -1,3 +1,7 @@
+body {
+  background-color: #282c34;
+}
+
 h1 {
   font-family: "Mona Sans", sans-serif;
   color: white;
@@ -11,7 +15,7 @@ h1 {
 
 #img1 {
   position: absolute;
-  top: 515px;
+  top: 150px;
   height: 150px;
   border-radius: 10px;
 }
