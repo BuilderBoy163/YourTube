@@ -10,6 +10,7 @@ h1 {
 }
 
 #img1 {
+  position: absolute;
   top: 515px;
   height: 150px;
   border-radius: 10px;
