@@ -1,4 +1,10 @@
-html {
-  height: 100%;
-  width: 100%;
+h1 {
+  font-family: "Mona Sans", sans-serif;
+  
+}
+.header {
+    background-color: #282c34;
+    padding: 20px;               /* space inside the box */
+    text-align: center;          /* center the text */
+    border-radius: 10px;
 }
