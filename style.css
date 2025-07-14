@@ -8,3 +8,9 @@ h1 {
     text-align: center;          /* center the text */
     border-radius: 10px;
 }
+
+#img1 {
+  top: 500px;
+  height: 150px;
+  border-radius: 10px;
+}
