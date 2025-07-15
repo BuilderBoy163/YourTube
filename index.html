@@ -33,19 +33,31 @@
 
     <main id="videoGrid" class="grid"></main>
   </div>
-  <div id="authForms">
-    <h2>Sign Up</h2>
-    <input id="signupEmail" placeholder="Email" type="email" />
-    <input id="signupPassword" placeholder="Password" type="password" />
-    <button id="signupBtn">Sign Up</button>
-
-    <h2>Sign In</h2>
-    <input id="signinEmail" placeholder="Email" type="email" />
-    <input id="signinPassword" placeholder="Password" type="password" />
-    <button id="signinBtn">Sign In</button>
+  <div id="authModal" class="auth-modal" style="display:none;">
+    <div class="auth-modal-content">
+      <button class="auth-close" onclick="closeAuthModal()">&times;</button>
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchTab('signin')">Sign In</button>
+        <button class="auth-tab" onclick="switchTab('signup')">Sign Up</button>
+      </div>
+      
+      <div id="signinForm" class="auth-form active">
+        <h2>Welcome Back</h2>
+        <input id="signinEmail" placeholder="Email" type="email" />
+        <input id="signinPassword" placeholder="Password" type="password" />
+        <button id="signinBtn" class="auth-button">Sign In</button>
+      </div>
+      
+      <div id="signupForm" class="auth-form">
+        <h2>Join YourTube</h2>
+        <input id="signupEmail" placeholder="Email" type="email" />
+        <input id="signupPassword" placeholder="Password" type="password" />
+        <button id="signupBtn" class="auth-button">Sign Up</button>
+      </div>
+      
+      <div id="authStatus" class="auth-status"></div>
+    </div>
   </div>
-
-  <div id="authStatus"></div>
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 

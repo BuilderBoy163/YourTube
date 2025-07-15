@@ -125,33 +125,168 @@ searchButton.onclick = async () => {
     videoGrid.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
   }
 };
+// Auth modal management
+function openAuthModal() {
+  document.getElementById('authModal').style.display = 'flex';
+}
+
+function closeAuthModal() {
+  document.getElementById('authModal').style.display = 'none';
+  clearAuthStatus();
+}
+
+function switchTab(tab) {
+  // Update tab buttons
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.auth-tab[onclick="switchTab('${tab}')"]`).classList.add('active');
+  
+  // Update form visibility
+  document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+  document.getElementById(tab + 'Form').classList.add('active');
+  
+  clearAuthStatus();
+}
+
+function showAuthStatus(message, type = 'info') {
+  const statusDiv = document.getElementById('authStatus');
+  statusDiv.className = `auth-status ${type}`;
+  statusDiv.textContent = message;
+}
+
+function clearAuthStatus() {
+  const statusDiv = document.getElementById('authStatus');
+  statusDiv.className = 'auth-status';
+  statusDiv.style.display = 'none';
+}
+
+function updateAuthButton(user) {
+  const authButton = document.getElementById('authorize_button');
+  const signoutButton = document.getElementById('signout_button');
+  
+  if (user) {
+    authButton.style.display = 'none';
+    signoutButton.style.display = 'inline-block';
+    signoutButton.textContent = `Sign Out (${user.email.split('@')[0]})`;
+  } else {
+    authButton.style.display = 'inline-block';
+    signoutButton.style.display = 'none';
+  }
+}
+
+// Update auth button click handler
+document.getElementById('authorize_button').onclick = openAuthModal;
+
 // Signup handler
 document.getElementById('signupBtn').onclick = async () => {
-  const email = document.getElementById('signupEmail').value;
+  const email = document.getElementById('signupEmail').value.trim();
   const password = document.getElementById('signupPassword').value;
-  const { error } = await window.supabase.auth.signUp({ email, password });
-  document.getElementById('authStatus').innerText = error ? error.message : 'Sign‑up successful!';
+  
+  if (!email || !password) {
+    showAuthStatus('Please fill in all fields', 'error');
+    return;
+  }
+  
+  if (password.length < 6) {
+    showAuthStatus('Password must be at least 6 characters', 'error');
+    return;
+  }
+  
+  showAuthStatus('Creating account...', 'info');
+  
+  try {
+    const { error } = await window.supabase.auth.signUp({ email, password });
+    
+    if (error) {
+      showAuthStatus(error.message, 'error');
+    } else {
+      showAuthStatus('Account created! Please check your email to verify your account.', 'success');
+      // Clear form
+      document.getElementById('signupEmail').value = '';
+      document.getElementById('signupPassword').value = '';
+    }
+  } catch (err) {
+    showAuthStatus('An unexpected error occurred', 'error');
+  }
 };
 
 // Signin handler
 document.getElementById('signinBtn').onclick = async () => {
-  const email = document.getElementById('signinEmail').value;
+  const email = document.getElementById('signinEmail').value.trim();
   const password = document.getElementById('signinPassword').value;
-  const { error, session } = await window.supabase.auth.signInWithPassword({ email, password });
-  document.getElementById('authStatus').innerText = error ? error.message : `Signed in as ${session.user.email}!`;
+  
+  if (!email || !password) {
+    showAuthStatus('Please fill in all fields', 'error');
+    return;
+  }
+  
+  showAuthStatus('Signing in...', 'info');
+  
+  try {
+    const { error, data } = await window.supabase.auth.signInWithPassword({ email, password });
+    
+    if (error) {
+      showAuthStatus(error.message, 'error');
+    } else {
+      showAuthStatus(`Welcome back, ${data.user.email}!`, 'success');
+      updateAuthButton(data.user);
+      setTimeout(() => {
+        closeAuthModal();
+        showRandomVideos();
+      }, 1500);
+    }
+  } catch (err) {
+    showAuthStatus('An unexpected error occurred', 'error');
+  }
+};
 
-  if (!error) {
-    document.getElementById('authForms').style.display = 'none';
-    showRandomVideos(); // now you can show personalized content
+// Signout handler
+document.getElementById('signout_button').onclick = async () => {
+  try {
+    await window.supabase.auth.signOut();
+    updateAuthButton(null);
+    showRandomVideos(); // Show default content
+  } catch (err) {
+    console.error('Sign out error:', err);
   }
 };
 
 // Auto-detect session on load
 window.addEventListener('DOMContentLoaded', async () => {
-  const { data: { session } } = await window.supabase.auth.getSession();
-  if (session) {
-    document.getElementById('authStatus').innerText = `Welcome back, ${session.user.email}!`;
-    document.getElementById('authForms').style.display = 'none';
-    showRandomVideos();
+  try {
+    const { data: { session } } = await window.supabase.auth.getSession();
+    if (session?.user) {
+      updateAuthButton(session.user);
+    }
+  } catch (err) {
+    console.error('Session check error:', err);
+  }
+});
+
+// Listen for auth state changes
+window.supabase.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_IN') {
+    updateAuthButton(session.user);
+  } else if (event === 'SIGNED_OUT') {
+    updateAuthButton(null);
+  }
+});
+
+// Close modal when clicking outside
+document.getElementById('authModal').onclick = (e) => {
+  if (e.target.id === 'authModal') {
+    closeAuthModal();
+  }
+};
+
+// Add Enter key support for forms
+document.getElementById('signinPassword').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    document.getElementById('signinBtn').click();
+  }
+});
+
+document.getElementById('signupPassword').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    document.getElementById('signupBtn').click();
   }
 });
