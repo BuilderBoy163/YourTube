@@ -102,15 +102,30 @@ searchButton.onclick = () => {
   });
 };
 
+function openPlayer(videoId) {
+  const modal = document.getElementById('videoPlayerModal');
+  const iframe = document.getElementById('videoPlayer');
+  iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+  modal.style.display = 'flex';
+}
+
+function closePlayer() {
+  const modal = document.getElementById('videoPlayerModal');
+  const iframe = document.getElementById('videoPlayer');
+  iframe.src = '';
+  modal.style.display = 'none';
+}
+
 // 🧱 Reusable render function
 function addVideoToGrid(video) {
   const vid = document.createElement('div');
   vid.className = 'video';
   vid.innerHTML = `
-    <a href="https://www.youtube.com/watch?v=${video.id.videoId}" target="_blank">
+    <div onclick="openPlayer('${video.id.videoId}')" style="cursor:pointer;">
       <img src="${video.snippet.thumbnails.medium.url}" alt="">
       <h3>${video.snippet.title}</h3>
       <p>${video.snippet.channelTitle}</p>
-    </a>`;
+    </div>
+  `;
   videoGrid.appendChild(vid);
 }
